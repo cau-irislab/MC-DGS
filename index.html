@@ -67,7 +67,7 @@
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-      background: #1a1a2e;
+      background: #f5f5f5;
       cursor: grab;
     }
     .mesh-viewer-wrap:active { cursor: grabbing; }
@@ -475,17 +475,8 @@ document.querySelectorAll('.mesh-viewer-wrap[data-ply]').forEach(function(wrap) 
 
   // Scene / Camera
   var scene  = new THREE.Scene();
-  scene.background = new THREE.Color(0x2b2b3b);
+  scene.background = new THREE.Color(0xf5f5f5);
   var camera = new THREE.PerspectiveCamera(45, 1, 0.001, 1000);
-
-  // Lights — bright multi-directional
-  scene.add(new THREE.AmbientLight(0xffffff, 1.8));
-  var d1 = new THREE.DirectionalLight(0xffffff, 2.0);
-  d1.position.set(1, 2, 2);
-  scene.add(d1);
-  var d2 = new THREE.DirectionalLight(0xffffff, 1.2);
-  d2.position.set(-2, -1, -1);
-  scene.add(d2);
 
   // Controls
   var controls = new OrbitControls(camera, renderer.domElement);
@@ -505,11 +496,12 @@ document.querySelectorAll('.mesh-viewer-wrap[data-ply]').forEach(function(wrap) 
   new PLYLoader().load(plyUrl, function(geometry) {
     geometry.computeVertexNormals();
 
+    // MeshBasicMaterial: vertex colors are pre-lit (baked), no additional lighting needed
     var mat;
     if (geometry.hasAttribute('color')) {
-      mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, metalness: 0.0 });
+      mat = new THREE.MeshBasicMaterial({ vertexColors: true });
     } else {
-      mat = new THREE.MeshStandardMaterial({ color: 0x88aacc, roughness: 0.7, metalness: 0.0 });
+      mat = new THREE.MeshBasicMaterial({ color: 0x88aacc });
     }
 
     var mesh = new THREE.Mesh(geometry, mat);
