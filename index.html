@@ -52,18 +52,18 @@
     html { scroll-behavior: smooth; }
     body { background: #fafafa; }
 
-    /* ── Hero gradient ── */
-    .hero.is-light, section.hero:first-of-type {
+    /* ── Hero gradient (첫 번째 hero만) ── */
+    body > section.hero:first-of-type {
       background: linear-gradient(135deg, #0f172a 0%, #1a3557 60%, #1e4d8c 100%) !important;
     }
-    .hero:first-of-type .title,
-    .hero:first-of-type .subtitle,
-    .hero:first-of-type .publication-title,
-    .hero:first-of-type .publication-authors,
-    .hero:first-of-type .eql-cntrb {
+    body > section.hero:first-of-type .title,
+    body > section.hero:first-of-type .subtitle,
+    body > section.hero:first-of-type .publication-title,
+    body > section.hero:first-of-type .publication-authors,
+    body > section.hero:first-of-type .eql-cntrb {
       color: #e8edf5 !important;
     }
-    .hero:first-of-type a { color: #93c5fd; }
+    body > section.hero:first-of-type a { color: #93c5fd; }
 
     /* ── Section title accent ── */
     .title.is-3 {
@@ -256,7 +256,7 @@
     }
 
     /* ── Section alternating bg ── */
-    section.section:nth-of-type(even) { background: #f0f4fa; }
+    section.section.hero.is-light { background: #f7f9fc !important; }
   </style>
 </head>
 <body>
