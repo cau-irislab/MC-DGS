@@ -75,6 +75,23 @@
       width: 100% !important;
       height: 100% !important;
     }
+    .mesh-frame-btns {
+      display: flex;
+      justify-content: center;
+      gap: 0.4rem;
+      margin-top: 0.6rem;
+    }
+    .mesh-btn {
+      padding: 0.25rem 0.75rem;
+      font-size: 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .mesh-btn:hover { background: #e8e8e8; }
+    .mesh-btn.active { background: #3273dc; color: #fff; border-color: #3273dc; }
     .mesh-hint {
       font-size: 0.8rem;
       color: #888;
@@ -442,17 +459,32 @@
     <div class="columns is-multiline video-grid">
       <div class="column is-one-third has-text-centered">
         <p class="video-label">Bird</p>
-        <div class="mesh-viewer-wrap" data-ply="static/mesh/bird.ply"></div>
+        <div class="mesh-viewer-wrap" data-ply-base="static/mesh/bird" data-frames="3"></div>
+        <div class="mesh-frame-btns" data-target="0">
+          <button class="mesh-btn active" data-frame="1">Frame 1</button>
+          <button class="mesh-btn" data-frame="2">Frame 2</button>
+          <button class="mesh-btn" data-frame="3">Frame 3</button>
+        </div>
         <p class="mesh-hint">drag / scroll / right-drag</p>
       </div>
       <div class="column is-one-third has-text-centered">
         <p class="video-label">Duck</p>
-        <div class="mesh-viewer-wrap" data-ply="static/mesh/duck.ply"></div>
+        <div class="mesh-viewer-wrap" data-ply-base="static/mesh/duck" data-frames="3"></div>
+        <div class="mesh-frame-btns" data-target="1">
+          <button class="mesh-btn active" data-frame="1">Frame 1</button>
+          <button class="mesh-btn" data-frame="2">Frame 2</button>
+          <button class="mesh-btn" data-frame="3">Frame 3</button>
+        </div>
         <p class="mesh-hint">drag / scroll / right-drag</p>
       </div>
       <div class="column is-one-third has-text-centered">
         <p class="video-label">T-Rex</p>
-        <div class="mesh-viewer-wrap" data-ply="static/mesh/trex.ply"></div>
+        <div class="mesh-viewer-wrap" data-ply-base="static/mesh/trex" data-frames="3"></div>
+        <div class="mesh-frame-btns" data-target="2">
+          <button class="mesh-btn active" data-frame="1">Frame 1</button>
+          <button class="mesh-btn" data-frame="2">Frame 2</button>
+          <button class="mesh-btn" data-frame="3">Frame 3</button>
+        </div>
         <p class="mesh-hint">drag / scroll / right-drag</p>
       </div>
     </div>
@@ -464,8 +496,10 @@ import * as THREE from 'three';
 import { PLYLoader } from 'three/addons/loaders/PLYLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-document.querySelectorAll('.mesh-viewer-wrap[data-ply]').forEach(function(wrap) {
-  var plyUrl = wrap.getAttribute('data-ply');
+var viewers = [];
+
+document.querySelectorAll('.mesh-viewer-wrap[data-ply-base]').forEach(function(wrap, idx) {
+  var plyBase = wrap.getAttribute('data-ply-base');
 
   // Renderer
   var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -492,7 +526,7 @@ document.querySelectorAll('.mesh-viewer-wrap[data-ply]').forEach(function(wrap) 
   controls.enableDamping = true;
   controls.dampingFactor  = 0.08;
 
-  // Resize observer to keep canvas filling the wrapper
+  // Resize observer
   var ro = new ResizeObserver(function(entries) {
     var e = entries[0].contentRect;
     renderer.setSize(e.width, e.height, false);
@@ -501,38 +535,59 @@ document.querySelectorAll('.mesh-viewer-wrap[data-ply]').forEach(function(wrap) 
   });
   ro.observe(wrap);
 
-  // Load PLY
-  new PLYLoader().load(plyUrl, function(geometry) {
-    geometry.computeVertexNormals();
-
-    var mat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.6, metalness: 0.0 });
-
-    var mesh = new THREE.Mesh(geometry, mat);
-
-    // Center and fit to view
-    geometry.computeBoundingBox();
-    var box    = geometry.boundingBox;
-    var center = new THREE.Vector3();
-    box.getCenter(center);
-    mesh.position.sub(center);
-
-    var size   = new THREE.Vector3();
-    box.getSize(size);
-    var maxDim = Math.max(size.x, size.y, size.z);
-    var scale  = 2.0 / maxDim;
-    mesh.scale.setScalar(scale);
-
-    scene.add(mesh);
-    camera.position.set(0, 0, 3);
-    controls.update();
-  });
-
   // Render loop
   (function animate() {
     requestAnimationFrame(animate);
     controls.update();
     renderer.render(scene, camera);
   })();
+
+  var currentMesh = null;
+  var loader = new PLYLoader();
+
+  function loadFrame(frameNum) {
+    var url = plyBase + '_frame' + frameNum + '.ply';
+    loader.load(url, function(geometry) {
+      geometry.computeVertexNormals();
+      var mat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.6, metalness: 0.0 });
+      var mesh = new THREE.Mesh(geometry, mat);
+
+      geometry.computeBoundingBox();
+      var center = new THREE.Vector3();
+      geometry.boundingBox.getCenter(center);
+      mesh.position.sub(center);
+
+      var size = new THREE.Vector3();
+      geometry.boundingBox.getSize(size);
+      var scale = 2.0 / Math.max(size.x, size.y, size.z);
+      mesh.scale.setScalar(scale);
+
+      if (currentMesh) {
+        scene.remove(currentMesh);
+        currentMesh.geometry.dispose();
+        currentMesh.material.dispose();
+      }
+      currentMesh = mesh;
+      scene.add(mesh);
+      camera.position.set(0, 0, 3);
+      controls.update();
+    });
+  }
+
+  viewers[idx] = { loadFrame: loadFrame };
+  loadFrame(1);
+});
+
+// Frame button events
+document.querySelectorAll('.mesh-frame-btns').forEach(function(btns) {
+  var idx = parseInt(btns.getAttribute('data-target'));
+  btns.querySelectorAll('.mesh-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      btns.querySelectorAll('.mesh-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      viewers[idx].loadFrame(parseInt(btn.getAttribute('data-frame')));
+    });
+  });
 });
 </script>
 
