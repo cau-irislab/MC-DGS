@@ -769,39 +769,6 @@ document.querySelectorAll('.mesh-frame-btns').forEach(function(btns) {
       </div>
     </div>
 
-    <hr class="ablation-divider">
-
-    <!-- Ablation 3 -->
-    <div class="columns is-centered">
-      <div class="column is-four-fifths has-text-centered">
-        <h3 class="title is-4">Effectiveness of RBER</h3>
-        <figure class="image" style="margin-bottom: 1.5rem;">
-          <img src="static/images/ablation3.jpg"
-               alt="Ablation on RBER: rendered images and L1 error maps comparing w/o RBER, +Φ_DR, and +Φ_DR Φ_lte at two time steps.">
-        </figure>
-        <div class="content has-text-justified">
-          <p>
-            After MCDM and SAAD, the representation becomes geometry-dominant: Gaussian centers and
-            orientations are strongly tied to the extracted surface, leaving limited residual freedom
-            for fine appearance details. RBER restores this missing expressiveness without
-            re-optimizing the underlying geometry.
-            We ablate its two sequential stages by comparing (a) the geometry-stabilized base
-            without any residual refinement, (b) adding the 3D deformation residual branch
-            Φ<sub>DR</sub>, and (c) further adding the 2D image-space residual branch Φ<sub>lte</sub>.
-            The 3D residual branch introduces local parameter corrections on top of the frozen base,
-            reducing the L1 error in fine-detail regions.
-            The subsequent image-space branch models the remaining high-frequency discrepancy,
-            recovering textures such as wing feathers that are difficult to encode through
-            geometry-constrained 3D primitives alone.
-            Consistent PSNR gains at both evaluated time steps
-            (T = 0: +4.88 dB, T = 1: +3.50 dB over the base) confirm that RBER
-            improves fine-scale appearance while retaining the geometric consistency
-            established by the preceding stages.
-          </p>
-        </div>
-      </div>
-    </div>
-
   </div>
 </section>
 
